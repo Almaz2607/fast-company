@@ -3,15 +3,6 @@ import api from "../api";
 
 const Users = () => {
   const [users, setUsers] = useState(api.users.fetchAll());
-  const [headers, setHeaders] = useState([
-    "Имя",
-    "Качества",
-    "Профессия",
-    "Встретился,раз",
-    "Оценка",
-    "",
-  ]);
-  const titleColor = users.length ? "primary" : "danger";
 
   const handleDelete = (userId) => {
     setUsers(users.filter((user) => user._id !== userId));
@@ -25,20 +16,26 @@ const Users = () => {
     if (number === 0) return "Никто с тобой не тусанет";
     if (number === 1) return "1 человек тусанет с тобой сегодня";
     if (isLocalGroup) return `${number} человека тусанут с тобой сегодня`;
-    if (number) return `${number} человек тусанут с тобой сегодня`;
+    return `${number} человек тусанут с тобой сегодня`;
   };
 
-  const renderTable = () => {
-    return (
-      users.length !== 0 && (
+  return (
+    <>
+      <h2>
+        <span className={"badge bg-" + (users.length ? "primary" : "danger")}>
+          {renderPhrase(users.length)}
+        </span>
+      </h2>
+      {users.length > 0 && (
         <table className="table">
           <thead>
             <tr>
-              {headers.map((header) => (
-                <th scope="col" key={header}>
-                  {header}
-                </th>
-              ))}
+              <th scope="col">Имя</th>
+              <th scope="col">Качества</th>
+              <th scope="col">Профессия</th>
+              <th scope="col">Встретился, раз</th>
+              <th scope="col">Оценка</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -72,18 +69,7 @@ const Users = () => {
             })}
           </tbody>
         </table>
-      )
-    );
-  };
-
-  return (
-    <>
-      <h2>
-        <span className={`badge bg-${titleColor}`}>
-          {renderPhrase(users.length)}
-        </span>
-      </h2>
-      {renderTable()}
+      )}
     </>
   );
 };
