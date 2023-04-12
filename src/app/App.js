@@ -24,7 +24,7 @@ function App() {
       <Users
         users={users}
         onDelete={handleDelete}
-        onToggle={handleToggleBookMark}
+        onToggleBookMark={handleToggleBookMark}
       />
     </div>
   );

@@ -18,16 +18,9 @@ const Users = ({ users, ...rest }) => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => {
-              return (
-                <User
-                  user={user}
-                  key={user._id}
-                  onDelete={rest.onDelete}
-                  onToggle={rest.onToggle}
-                />
-              );
-            })}
+            {users.map((user) => (
+              <User key={user._id} {...user} {...rest} />
+            ))}
           </tbody>
         </table>
       )}
