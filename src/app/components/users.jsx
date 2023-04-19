@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import User from "./user";
 import Pagination from "./pagination";
 import { paginate } from "../utils/paginate";
@@ -8,6 +8,16 @@ const Users = ({ users, ...rest }) => {
     const count = users.length;
     const pageSize = 4;
     const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        if (!count) return;
+
+        const isNoUsersOnPage = Math.ceil(count / pageSize) < currentPage;
+
+        if (isNoUsersOnPage) {
+            setCurrentPage(currentPage - 1);
+        }
+    }, [count]);
 
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
