@@ -52,13 +52,6 @@ const Users = () => {
         setSortBy(item);
     };
 
-    //  useEffect(() => {
-    //      if (!count) return;
-    //      const currentNumberPages = count / pageSize;
-    //      const isNotUsersOnPage = Math.ceil(currentNumberPages) < currentPage;
-    //      if (isNotUsersOnPage) setCurrentPage(currentNumberPages);
-    //  }, [count]);
-
     if (users) {
         const filteredUsers = selectedProf
             ? users.filter(
@@ -76,6 +69,7 @@ const Users = () => {
             [sortBy.order]
         );
         const userCrop = paginate(sortedUsers, currentPage, pageSize);
+
         const clearFilter = () => {
             setSelectedProf();
         };
