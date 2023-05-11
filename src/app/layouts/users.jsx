@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Pagination from "./pagination";
+import Pagination from "../components/pagination";
 import { paginate } from "../utils/paginate";
 import PropTypes from "prop-types";
-import GroupList from "./groupList";
+import GroupList from "../components/groupList";
 import api from "../api";
-import SearchStatus from "./searchStatus";
-import UsersTable from "./usersTable";
+import SearchStatus from "../components/searchStatus";
+import UsersTable from "../components/usersTable";
 import _ from "lodash";
+import UserPage from "../components/userPage";
+import { useParams } from "react-router-dom";
 
 const Users = () => {
     const [users, setUsers] = useState();
@@ -15,6 +17,9 @@ const Users = () => {
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
     const pageSize = 8;
+    const params = useParams();
+
+    const { userId } = params;
 
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
@@ -51,6 +56,8 @@ const Users = () => {
     const handleSort = (item) => {
         setSortBy(item);
     };
+
+    if (userId) return <UserPage id={userId} />;
 
     if (users) {
         const filteredUsers = selectedProf
