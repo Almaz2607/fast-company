@@ -7,6 +7,8 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UsersTable from "./usersTable";
 import Pagination from "./pagination";
+import SearchLine from "./searchLine";
+import { filtering } from "../utils/filter";
 
 const UsersList = () => {
     const [users, setUsers] = useState();
@@ -14,6 +16,8 @@ const UsersList = () => {
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
+    const [searchValue, setSearchValue] = useState("");
+
     const pageSize = 8;
 
     useEffect(() => {
@@ -37,9 +41,10 @@ const UsersList = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedProf]);
+    }, [selectedProf, searchValue]);
 
     const handleProfessionSelect = (item) => {
+        setSearchValue("");
         setSelectedProf(item);
     };
 
@@ -51,14 +56,13 @@ const UsersList = () => {
         setSortBy(item);
     };
 
+    const handleSearch = (substring) => {
+        setSelectedProf();
+        setSearchValue(substring);
+    };
+
     if (users) {
-        const filteredUsers = selectedProf
-            ? users.filter(
-                  (user) =>
-                      JSON.stringify(user.profession) ===
-                      JSON.stringify(selectedProf)
-              )
-            : users;
+        const filteredUsers = filtering(users, selectedProf, searchValue);
 
         const count = filteredUsers.length;
 
@@ -92,6 +96,7 @@ const UsersList = () => {
                 )}
                 <div className="d-flex flex-column">
                     <SearchStatus length={count} />
+                    <SearchLine value={searchValue} onSearch={handleSearch} />
                     {count > 0 && (
                         <UsersTable
                             users={userCrop}
