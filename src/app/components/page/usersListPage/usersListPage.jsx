@@ -7,8 +7,6 @@ import GroupList from "../../common/groupList";
 import SearchStatus from "../../ui/searchStatus";
 import UsersTable from "../../ui/usersTable";
 import Pagination from "../../common/pagination";
-import SearchLine from "../../ui/searchLine";
-import { filtering } from "../../../utils/filter";
 
 const UsersListPage = () => {
     const [users, setUsers] = useState();
@@ -16,7 +14,7 @@ const UsersListPage = () => {
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
-    const [searchValue, setSearchValue] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const pageSize = 8;
 
@@ -41,10 +39,10 @@ const UsersListPage = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedProf, searchValue]);
+    }, [selectedProf, searchQuery]);
 
     const handleProfessionSelect = (item) => {
-        setSearchValue("");
+        setSearchQuery("");
         setSelectedProf(item);
     };
 
@@ -56,13 +54,26 @@ const UsersListPage = () => {
         setSortBy(item);
     };
 
-    const handleSearch = (substring) => {
+    const handleSearch = ({ target }) => {
         setSelectedProf();
-        setSearchValue(substring);
+        setSearchQuery(target.value);
     };
 
     if (users) {
-        const filteredUsers = filtering(users, selectedProf, searchValue);
+        const filteredUsers = searchQuery
+            ? users.filter(
+                  (user) =>
+                      user.name
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) !== false
+              )
+            : selectedProf
+            ? users.filter(
+                  (user) =>
+                      JSON.stringify(user.profession) ===
+                      JSON.stringify(selectedProf)
+              )
+            : users;
 
         const count = filteredUsers.length;
 
@@ -96,7 +107,13 @@ const UsersListPage = () => {
                 )}
                 <div className="d-flex flex-column">
                     <SearchStatus length={count} />
-                    <SearchLine value={searchValue} onSearch={handleSearch} />
+                    <input
+                        type="text"
+                        name="searchQuery"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={handleSearch}
+                    />
                     {count > 0 && (
                         <UsersTable
                             users={userCrop}
