@@ -9,6 +9,10 @@ const SelectField = ({
     options,
     error
 }) => {
+    const handleChange = ({ target }) => {
+        onChange({ name: target.name, value: target.value });
+    };
+
     const getInputClases = () => {
         return "form-select " + (error ? "is-invalid" : "");
     };
@@ -31,14 +35,14 @@ const SelectField = ({
                 id="validationCustom04"
                 name="profession"
                 value={value}
-                onChange={onChange}
+                onChange={handleChange}
             >
                 <option disabled value="">
                     {defaultOption}
                 </option>
                 {optionsArray &&
                     optionsArray.map((option) => (
-                        <option key={option._id} value={option._id}>
+                        <option key={option.value} value={option.value}>
                             {option.name}
                         </option>
                     ))}
