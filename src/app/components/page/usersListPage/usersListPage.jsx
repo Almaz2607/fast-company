@@ -46,17 +46,17 @@ const UsersListPage = () => {
         setSelectedProf(item);
     };
 
+    const handleSearch = ({ target }) => {
+        setSelectedProf(undefined);
+        setSearchQuery(target.value);
+    };
+
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
     };
 
     const handleSort = (item) => {
         setSortBy(item);
-    };
-
-    const handleSearch = ({ target }) => {
-        setSelectedProf();
-        setSearchQuery(target.value);
     };
 
     if (users) {
@@ -82,7 +82,7 @@ const UsersListPage = () => {
             [sortBy.path],
             [sortBy.order]
         );
-        const userCrop = paginate(sortedUsers, currentPage, pageSize);
+        const usersCrop = paginate(sortedUsers, currentPage, pageSize);
 
         const clearFilter = () => {
             setSelectedProf();
@@ -116,7 +116,7 @@ const UsersListPage = () => {
                     />
                     {count > 0 && (
                         <UsersTable
-                            users={userCrop}
+                            users={usersCrop}
                             selectedSort={sortBy}
                             onSort={handleSort}
                             onToggleBookMark={handleToggleBookMark}

@@ -18,7 +18,7 @@ const LoginForm = () => {
         }));
     };
 
-    const validateScheme = yup.object().shape({
+    const validateSchema = yup.object().shape({
         password: yup
             .string()
             .required("Пароль обязателен для заполнения")
@@ -74,7 +74,7 @@ const LoginForm = () => {
 
     const validate = () => {
         //   const errors = validator(data, validatorConfig);
-        validateScheme
+        validateSchema
             .validate(data)
             .then(() => setErrors({}))
             .catch((err) => setErrors({ [err.path]: err.message }));

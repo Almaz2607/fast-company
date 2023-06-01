@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import api from "../../../api";
 import Qualities from "../../ui/qualities";
@@ -8,10 +8,12 @@ const UserPage = ({ userId }) => {
     const [user, setUser] = useState();
     const history = useHistory();
 
-    api.users.getById(userId).then((data) => setUser(data));
+    useEffect(() => {
+        api.users.getById(userId).then((data) => setUser(data));
+    }, []);
 
-    const handleMoveToList = () => {
-        history.push("/users");
+    const handleClick = () => {
+        history.replace(`/users/${userId}/edit`);
     };
 
     const renderUser = ({
@@ -27,7 +29,7 @@ const UserPage = ({ userId }) => {
             <Qualities qualities={qualities} />
             <p>completedMeetings: {completedMeetings}</p>
             <h2>Rate: {rate}</h2>
-            <button onClick={handleMoveToList}>Все Пользователи</button>
+            <button onClick={handleClick}>Изменить</button>
         </div>
     );
 
