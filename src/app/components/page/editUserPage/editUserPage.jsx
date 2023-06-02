@@ -12,6 +12,7 @@ const EditUserPage = ({ userId }) => {
     const [qualities, setQualities] = useState([]);
     const [professions, setProfession] = useState([]);
     const history = useHistory();
+    const isDataLoaded = data && qualities && professions;
 
     useEffect(() => {
         api.users.getById(userId).then((data) => {
@@ -109,7 +110,7 @@ const EditUserPage = ({ userId }) => {
         <div className="container mt-5">
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
-                    {data ? (
+                    {isDataLoaded ? (
                         <form onSubmit={handleSubmit}>
                             <TextField
                                 label="Имя"
