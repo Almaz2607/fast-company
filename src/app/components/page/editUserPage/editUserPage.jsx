@@ -12,7 +12,7 @@ const EditUserPage = ({ userId }) => {
     const [qualities, setQualities] = useState([]);
     const [professions, setProfession] = useState([]);
     const history = useHistory();
-    const isDataLoaded = data && qualities && professions;
+    const isDataLoaded = data && qualities.length > 0 && professions.length > 0;
 
     useEffect(() => {
         api.users.getById(userId).then((data) => {
