@@ -7,6 +7,7 @@ import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import { validator } from "../../../utils/validator";
 import { useHistory } from "react-router-dom";
+import BackHistoryButton from "../../common/backButton";
 
 const EditUserPage = ({ userId }) => {
     const [data, setData] = useState();
@@ -64,10 +65,6 @@ const EditUserPage = ({ userId }) => {
             ...prevState,
             [target.name]: target.value
         }));
-    };
-
-    const handleClick = () => {
-        history.push(`/users/${userId}`);
     };
 
     const validatorConfig = {
@@ -144,10 +141,7 @@ const EditUserPage = ({ userId }) => {
 
     return (
         <div className="container mt-5">
-            <button className="btn btn-primary" onClick={handleClick}>
-                <i className="bi bi-caret-left" />
-                Назад
-            </button>
+            <BackHistoryButton />
             <div className="col-md-6 offset-md-3 shadow p-4">
                 {isDataLoaded ? (
                     <form onSubmit={handleSubmit}>

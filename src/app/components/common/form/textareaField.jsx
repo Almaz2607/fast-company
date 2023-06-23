@@ -36,6 +36,10 @@ const TextareaField = ({
     );
 };
 
+TextareaField.defaultProps = {
+    type: "text"
+};
+
 TextareaField.propTypes = {
     label: PropTypes.string,
     name: PropTypes.string,
