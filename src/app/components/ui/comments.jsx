@@ -14,10 +14,9 @@ const Comments = ({ userId }) => {
     }, []);
 
     const handleRemoveComment = (id) => {
-        const updatedComments = comments.filter(
-            (comment) => comment._id !== id
-        );
-        setComments(updatedComments);
+        api.comments.remove(id).then((id) => {
+            setComments(comments.filter((c) => c._id !== id));
+        });
     };
 
     const handleSubmit = (data) => {
