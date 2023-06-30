@@ -13,25 +13,21 @@ const UserPage = ({ userId }) => {
         api.users.getById(userId).then((data) => setUser(data));
     }, []);
 
+    if (!user) return "Loading ...";
+
     return (
-        <>
-            {user ? (
-                <div className="container">
-                    <div className="row gutters-sm">
-                        <div className="col-md-4 mb-3">
-                            <UserCard user={user} />
-                            <QualitiesCard data={user.qualities} />
-                            <MeetingsCard value={user.completedMeetings} />
-                        </div>
-                        <div className="col-md-8">
-                            <Comments userId={userId} />
-                        </div>
-                    </div>
+        <div className="container">
+            <div className="row gutters-sm">
+                <div className="col-md-4 mb-3">
+                    <UserCard user={user} />
+                    <QualitiesCard data={user.qualities} />
+                    <MeetingsCard value={user.completedMeetings} />
                 </div>
-            ) : (
-                <h2>{"Loading"}</h2>
-            )}
-        </>
+                <div className="col-md-8">
+                    <Comments userId={userId} />
+                </div>
+            </div>
+        </div>
     );
 };
 

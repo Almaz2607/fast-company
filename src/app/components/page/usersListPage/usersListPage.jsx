@@ -7,30 +7,29 @@ import GroupList from "../../common/groupList";
 import SearchStatus from "../../ui/searchStatus";
 import UsersTable from "../../ui/usersTable";
 import Pagination from "../../common/pagination";
+import { useUser } from "../../../hooks/useUser";
 
 const UsersListPage = () => {
-    const [users, setUsers] = useState();
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
     const [searchQuery, setSearchQuery] = useState("");
-
     const pageSize = 8;
 
-    useEffect(() => {
-        api.users.fetchAll().then((data) => setUsers(data));
-    }, []);
+    const { users } = useUser();
 
     const handleDelete = (userId) => {
-        setUsers(users.filter((user) => user._id !== userId));
+        //   setUsers(users.filter((user) => user._id !== userId));
+        console.log(userId);
     };
 
     const handleToggleBookMark = (id) => {
         const newArray = users.map((user) =>
             user._id === id ? { ...user, bookmark: !user.bookmark } : user
         );
-        setUsers(newArray);
+        //   setUsers(newArray);
+        console.log(newArray);
     };
 
     useEffect(() => {
