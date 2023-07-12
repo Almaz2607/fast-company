@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import UserPage from "../components/page/userPage";
 import UsersListPage from "../components/page/usersListPage";
 import EditUserPage from "../components/page/editUserPage/editUserPage";
-import UserProvider from "../hooks/useUser";
+import UserProvider from "../hooks/useUsers";
 
 const Users = () => {
     const params = useParams();
