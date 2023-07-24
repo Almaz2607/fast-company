@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import api from "../../../api";
 import _ from "lodash";
 import { paginate } from "../../../utils/paginate";
 import GroupList from "../../common/groupList";
@@ -8,16 +7,18 @@ import SearchStatus from "../../ui/searchStatus";
 import UsersTable from "../../ui/usersTable";
 import Pagination from "../../common/pagination";
 import { useUser } from "../../../hooks/useUsers";
+import { useProfession } from "../../../hooks/useProfession";
+import { useAuth } from "../../../hooks/useAuth";
 
 const UsersListPage = () => {
+    const { users } = useUser();
+    const { currentUser } = useAuth();
+    const { isLoading: professionsLoading, professions } = useProfession();
     const [currentPage, setCurrentPage] = useState(1);
-    const [professions, setProfession] = useState();
+    const [searchQuery, setSearchQuery] = useState("");
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
-    const [searchQuery, setSearchQuery] = useState("");
     const pageSize = 8;
-
-    const { users } = useUser();
 
     const handleDelete = (userId) => {
         //   setUsers(users.filter((user) => user._id !== userId));
@@ -33,19 +34,15 @@ const UsersListPage = () => {
     };
 
     useEffect(() => {
-        api.professions.fetchAll().then((data) => setProfession(data));
-    }, []);
-
-    useEffect(() => {
         setCurrentPage(1);
     }, [selectedProf, searchQuery]);
 
     const handleProfessionSelect = (item) => {
-        setSearchQuery("");
+        if (searchQuery !== "") setSearchQuery("");
         setSelectedProf(item);
     };
 
-    const handleSearch = ({ target }) => {
+    const handleSearchQuery = ({ target }) => {
         setSelectedProf(undefined);
         setSearchQuery(target.value);
     };
@@ -57,25 +54,27 @@ const UsersListPage = () => {
     const handleSort = (item) => {
         setSortBy(item);
     };
-
     if (users) {
-        const filteredUsers = searchQuery
-            ? users.filter(
-                  (user) =>
-                      user.name
-                          .toLowerCase()
-                          .includes(searchQuery.toLowerCase()) !== false
-              )
-            : selectedProf
-            ? users.filter(
-                  (user) =>
-                      JSON.stringify(user.profession) ===
-                      JSON.stringify(selectedProf)
-              )
-            : users;
+        function filterUsers(data) {
+            const filteredUsers = searchQuery
+                ? data.filter(
+                      (user) =>
+                          user.name
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase()) !== false
+                  )
+                : selectedProf
+                ? data.filter(
+                      (user) =>
+                          JSON.stringify(user.profession) ===
+                          JSON.stringify(selectedProf)
+                  )
+                : data;
+            return filteredUsers.filter((u) => u._id !== currentUser._id);
+        }
 
+        const filteredUsers = filterUsers(users);
         const count = filteredUsers.length;
-
         const sortedUsers = _.orderBy(
             filteredUsers,
             [sortBy.path],
@@ -89,12 +88,12 @@ const UsersListPage = () => {
 
         return (
             <div className="d-flex">
-                {professions && (
+                {professions && !professionsLoading && (
                     <div className="d-flex flex-column flex-shrink-0 p-3">
                         <GroupList
+                            selectedItem={selectedProf}
                             items={professions}
                             onItemSelect={handleProfessionSelect}
-                            selectedItem={selectedProf}
                         />
                         <button
                             className="btn btn-secondary mt-2"
@@ -110,16 +109,16 @@ const UsersListPage = () => {
                         type="text"
                         name="searchQuery"
                         placeholder="Search..."
+                        onChange={handleSearchQuery}
                         value={searchQuery}
-                        onChange={handleSearch}
                     />
                     {count > 0 && (
                         <UsersTable
                             users={usersCrop}
-                            selectedSort={sortBy}
                             onSort={handleSort}
-                            onToggleBookMark={handleToggleBookMark}
+                            selectedSort={sortBy}
                             onDelete={handleDelete}
+                            onToggleBookMark={handleToggleBookMark}
                         />
                     )}
                     <div className="d-flex justify-content-center">
@@ -134,7 +133,7 @@ const UsersListPage = () => {
             </div>
         );
     }
-    return "loading ...";
+    return "loading...";
 };
 
 UsersListPage.propTypes = {

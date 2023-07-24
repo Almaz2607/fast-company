@@ -1,19 +1,42 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import configFile from "../config.json";
+import localStorageService from "./localStorage.service";
+import { httpAuth } from "../hooks/useAuth";
 
 const http = axios.create({
     baseURL: configFile.apiEndPoint
 });
 
 http.interceptors.request.use(
-    function (config) {
-        if (configFile) {
+    async function (config) {
+        if (configFile.isFirebase) {
             const containSlash = /\/$/gi.test(config.url);
             config.url =
                 (containSlash ? config.url.slice(0, -1) : config.url) + ".json";
-        }
 
+            const refreshToken = localStorageService.getRefreshToken();
+            const expiresDate = localStorageService.getTokenExpiresDate();
+
+            if (refreshToken && expiresDate < Date.now()) {
+                const { data } = await httpAuth.post("token", {
+                    grant_type: "refresh_token",
+                    refresh_token: refreshToken
+                });
+
+                localStorageService.setTokens({
+                    refreshToken: data.refresh_token,
+                    idToken: data.id_token,
+                    expiresIn: data.expires_id,
+                    localId: data.user_id
+                });
+            }
+
+            const accessToken = localStorageService.getAccessToken();
+            if (accessToken) {
+                config.params = { ...config.params, auth: accessToken };
+            }
+        }
         return config;
     },
     function (error) {
@@ -22,11 +45,11 @@ http.interceptors.request.use(
 );
 
 const transformData = (data) => {
-    return data
+    return data && !data._id
         ? Object.keys(data).map((key) => ({
               ...data[key]
           }))
-        : [];
+        : data;
 };
 
 http.interceptors.response.use(
@@ -34,7 +57,6 @@ http.interceptors.response.use(
         if (configFile.isFirebase) {
             res.data = { content: transformData(res.data) };
         }
-
         return res;
     },
     function (error) {
@@ -43,7 +65,7 @@ http.interceptors.response.use(
             error.response.status >= 400 &&
             error.response.status < 500;
         if (!expectedErrors) {
-            toast.error("Something was wrong. Try to later");
+            toast.error("Something was wrong. Try it later");
         }
         return Promise.reject(error);
     }

@@ -1,63 +1,63 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import api from "../../../api";
 import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import { validator } from "../../../utils/validator";
-import { useHistory } from "react-router-dom";
 import BackHistoryButton from "../../common/backButton";
+import { useUser } from "../../../hooks/useUsers";
+import { useProfession } from "../../../hooks/useProfession";
+import { useQualities } from "../../../hooks/useQualities";
+import { useParams, useHistory } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 
-const EditUserPage = ({ userId }) => {
+const EditUserPage = () => {
+    const history = useHistory();
+    const { userId } = useParams();
     const [data, setData] = useState();
     const [errors, setErrors] = useState({});
-    const [qualities, setQualities] = useState([]);
-    const [professions, setProfession] = useState([]);
-    const history = useHistory();
+    const { professions } = useProfession();
+    const { qualities } = useQualities();
+    const { getUserById } = useUser();
+    const { updateUser } = useAuth();
+    const user = getUserById(userId);
+
+    const professionsList = professions.map((p) => ({
+        value: p._id,
+        label: p.name
+    }));
+    const qualitiesList = qualities.map((q) => ({
+        value: q._id,
+        label: q.name,
+        color: q.color
+    }));
+
     const isDataLoaded = data && qualities.length > 0 && professions.length > 0;
 
-    useEffect(() => {
-        api.users.getById(userId).then((data) => {
-            const convertedUser = {};
-
-            for (const fieldName in data) {
-                if (fieldName === "profession") {
-                    convertedUser[fieldName] = {
-                        label: data[fieldName].name,
-                        value: data[fieldName]._id
-                    };
-                } else if (fieldName === "qualities") {
-                    convertedUser[fieldName] = data[fieldName].map(
-                        (quality) => ({
-                            label: quality.name,
-                            value: quality._id,
-                            color: quality.color
-                        })
-                    );
-                } else {
-                    convertedUser[fieldName] = data[fieldName];
+    function transformData(data) {
+        const filteredData = [];
+        data.forEach((q) => {
+            for (const qual of qualities) {
+                if (qual._id === q) {
+                    filteredData.push(qual);
                 }
             }
-            setData(convertedUser);
         });
+        const convertedData = filteredData.map((q) => ({
+            value: q._id,
+            label: q.name,
+            color: q.color
+        }));
+        return convertedData;
+    }
 
-        api.qualities.fetchAll().then((data) => {
-            const qualitiesList = Object.keys(data).map((optionName) => ({
-                label: data[optionName].name,
-                value: data[optionName]._id,
-                color: data[optionName].color
-            }));
-            setQualities(qualitiesList);
-        });
-
-        api.professions.fetchAll().then((data) => {
-            const professionList = Object.keys(data).map((professionName) => ({
-                label: data[professionName].name,
-                value: data[professionName]._id
-            }));
-            setProfession(professionList);
-        });
+    useEffect(() => {
+        setData((prevState) => ({
+            ...prevState,
+            ...user,
+            qualities: transformData(user.qualities)
+        }));
     }, []);
 
     const handleChange = (target) => {
@@ -95,47 +95,22 @@ const EditUserPage = ({ userId }) => {
 
     const isValid = Object.keys(errors).length === 0;
 
-    const getProfessionById = (id) => {
-        for (const prof of professions) {
-            if (prof.value === id) {
-                return { _id: prof.value, name: prof.label };
-            }
-        }
-    };
-
     const getQualities = (elements) => {
-        const qualitiesArray = [];
-
-        for (const elem of elements) {
-            for (const quality in qualities) {
-                if (elem.value === qualities[quality].value) {
-                    qualitiesArray.push({
-                        name: qualities[quality].label,
-                        _id: qualities[quality].value,
-                        color: qualities[quality].color
-                    });
-                }
-            }
-        }
-        return qualitiesArray;
+        return elements.map((q) => q.value);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        const { profession, qualities } = data;
+        const { qualities } = data;
 
-        const id =
-            typeof profession === "object" ? profession.value : profession;
-        const updatedUser = {
+        const updatedData = {
             ...data,
-            profession: getProfessionById(id),
             qualities: getQualities(qualities)
         };
 
-        api.users.update(userId, updatedUser);
-
+        updateUser(updatedData);
         history.push(`/users/${userId}`);
     };
 
@@ -162,10 +137,10 @@ const EditUserPage = ({ userId }) => {
                         <SelectField
                             label="Выбери свою профессию"
                             name="profession"
-                            value={data.profession.value}
+                            value={data.profession}
                             onChange={handleChange}
                             defaultOption="Choose..."
-                            options={professions}
+                            options={professionsList}
                         />
                         <RadioField
                             label="Выберите ваш пол"
@@ -183,7 +158,7 @@ const EditUserPage = ({ userId }) => {
                             name="qualities"
                             defaultValue={data.qualities}
                             onChange={handleChange}
-                            options={qualities}
+                            options={qualitiesList}
                         />
                         <button
                             type="submit"

@@ -1,28 +1,22 @@
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import api from "../../api";
-import CommentsList from "../common/comments/commentsList";
-import AddCommentForm from "../common/comments/addCommentForm";
+import React from "react";
+import CommentsList, { AddCommentForm } from "../common/comments/";
+import { useComments } from "../../hooks/useComments";
 
-const Comments = ({ userId }) => {
-    const [comments, setComments] = useState([]);
-
-    useEffect(() => {
-        api.comments
-            .fetchCommentsForUser(userId)
-            .then((data) => setComments(data));
-    }, []);
-
-    const handleRemoveComment = (id) => {
-        api.comments.remove(id).then((id) => {
-            setComments(comments.filter((c) => c._id !== id));
-        });
-    };
+const Comments = () => {
+    const { comments, createComment, removeComment } = useComments();
 
     const handleSubmit = (data) => {
-        api.comments
-            .add({ ...data, pageId: userId })
-            .then((data) => setComments([...comments, data]));
+        createComment(data);
+        // api.comments
+        //     .add({ ...data, pageId: userId })
+        //     .then((data) => setComments([...comments, data]));
+    };
+
+    const handleRemoveComment = (id) => {
+        removeComment(id);
+        // api.comments.remove(id).then((id) => {
+        //     setComments(comments.filter((c) => c._id !== id));
+        // });
     };
 
     const sortedComments = comments.sort((a, b) => b.created_at - a.created_at);
@@ -49,10 +43,6 @@ const Comments = ({ userId }) => {
             )}
         </>
     );
-};
-
-Comments.propTypes = {
-    userId: PropTypes.string
 };
 
 export default Comments;

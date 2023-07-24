@@ -11,29 +11,28 @@ import { useAuth } from "../../hooks/useAuth";
 import { useHistory } from "react-router-dom";
 
 const RegisterForm = () => {
+    const history = useHistory();
     const [data, setData] = useState({
         email: "",
         password: "",
         profession: "",
         sex: "male",
+        name: "",
         qualities: [],
         licence: false
     });
-    const [errors, setErrors] = useState({});
-    const { qualities } = useQualities();
-    const { professions } = useProfession();
     const { signUp } = useAuth();
-    const history = useHistory();
-
-    const professionsList = professions.map((p) => ({
-        value: p._id,
-        label: p.name
-    }));
-
+    const { qualities } = useQualities();
     const qualitiesList = qualities.map((q) => ({
         value: q._id,
         label: q.name
     }));
+    const { professions } = useProfession();
+    const professionsList = professions.map((p) => ({
+        value: p._id,
+        label: p.name
+    }));
+    const [errors, setErrors] = useState({});
 
     const handleChange = (target) => {
         setData((prevState) => ({
@@ -49,6 +48,15 @@ const RegisterForm = () => {
             },
             isEmail: {
                 message: "Email введен некорректно"
+            }
+        },
+        name: {
+            isRequired: {
+                message: "Имя обязательно для заполнения"
+            },
+            min: {
+                message: "Имя должно быть длиной не менее 3-х символов",
+                value: 3
             }
         },
         password: {
@@ -115,6 +123,13 @@ const RegisterForm = () => {
                 value={data.email}
                 onChange={handleChange}
                 error={errors.email}
+            />
+            <TextField
+                label="Имя"
+                name="name"
+                value={data.name}
+                onChange={handleChange}
+                error={errors.name}
             />
             <TextField
                 label="Пароль"
