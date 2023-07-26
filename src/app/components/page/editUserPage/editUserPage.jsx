@@ -6,22 +6,19 @@ import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import { validator } from "../../../utils/validator";
 import BackHistoryButton from "../../common/backButton";
-import { useUser } from "../../../hooks/useUsers";
 import { useProfession } from "../../../hooks/useProfession";
 import { useQualities } from "../../../hooks/useQualities";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 
 const EditUserPage = () => {
     const history = useHistory();
-    const { userId } = useParams();
+    const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState();
     const [errors, setErrors] = useState({});
-    const { professions } = useProfession();
-    const { qualities } = useQualities();
-    const { getUserById } = useUser();
-    const { updateUser } = useAuth();
-    const user = getUserById(userId);
+    const { professions, isLoading: professionsLoading } = useProfession();
+    const { qualities, isLoading: qualitiesLoading } = useQualities();
+    const { currentUser, updateUserData } = useAuth();
 
     const professionsList = professions.map((p) => ({
         value: p._id,
@@ -29,36 +26,45 @@ const EditUserPage = () => {
     }));
     const qualitiesList = qualities.map((q) => ({
         value: q._id,
-        label: q.name,
-        color: q.color
+        label: q.name
     }));
 
     const isDataLoaded = data && qualities.length > 0 && professions.length > 0;
 
-    function transformData(data) {
-        const filteredData = [];
-        data.forEach((q) => {
-            for (const qual of qualities) {
-                if (qual._id === q) {
-                    filteredData.push(qual);
+    function getQualitiesListByIds(qualitiesIds) {
+        const arrayQualities = [];
+        for (const qualIds of qualitiesIds) {
+            for (const quality of qualities) {
+                if (quality._id === qualIds) {
+                    arrayQualities.push(quality);
+                    break;
                 }
             }
-        });
-        const convertedData = filteredData.map((q) => ({
-            value: q._id,
-            label: q.name,
-            color: q.color
+        }
+        return arrayQualities;
+    }
+
+    function transformData(data) {
+        return getQualitiesListByIds(data).map((qual) => ({
+            value: qual._id,
+            label: qual.name
         }));
-        return convertedData;
     }
 
     useEffect(() => {
-        setData((prevState) => ({
-            ...prevState,
-            ...user,
-            qualities: transformData(user.qualities)
-        }));
-    }, []);
+        if (!professionsLoading && !qualitiesLoading && currentUser && !data) {
+            setData({
+                ...currentUser,
+                qualities: transformData(currentUser.qualities)
+            });
+        }
+    }, [professionsLoading, qualitiesLoading, currentUser, data]);
+
+    useEffect(() => {
+        if (data && isLoading) {
+            setLoading(false);
+        }
+    }, [data]);
 
     const handleChange = (target) => {
         setData((prevState) => ({
@@ -95,23 +101,16 @@ const EditUserPage = () => {
 
     const isValid = Object.keys(errors).length === 0;
 
-    const getQualities = (elements) => {
-        return elements.map((q) => q.value);
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        const { qualities } = data;
 
-        const updatedData = {
+        await updateUserData({
             ...data,
-            qualities: getQualities(qualities)
-        };
-
-        updateUser(updatedData);
-        history.push(`/users/${userId}`);
+            qualities: data.qualities.map((qual) => qual.value)
+        });
+        history.push(`/users/${currentUser._id}`);
     };
 
     return (
