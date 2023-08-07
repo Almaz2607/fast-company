@@ -7,9 +7,13 @@ import MultiSelectField from "../../common/form/multiSelectField";
 import { validator } from "../../../utils/validator";
 import BackHistoryButton from "../../common/backButton";
 import { useProfession } from "../../../hooks/useProfession";
-import { useQualities } from "../../../hooks/useQualities";
 import { useHistory } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSelector } from "react-redux";
+import {
+    getQualities,
+    getQualitiesLoadingStatus
+} from "../../../store/qualities";
 
 const EditUserPage = () => {
     const history = useHistory();
@@ -17,7 +21,8 @@ const EditUserPage = () => {
     const [data, setData] = useState();
     const [errors, setErrors] = useState({});
     const { professions, isLoading: professionsLoading } = useProfession();
-    const { qualities, isLoading: qualitiesLoading } = useQualities();
+    const qualities = useSelector(getQualities());
+    const qualitiesLoading = useSelector(getQualitiesLoadingStatus());
     const { currentUser, updateUserData } = useAuth();
 
     const professionsList = professions.map((p) => ({

@@ -44,12 +44,12 @@ const useMockData = () => {
                 await httpService.put("profession/" + prof._id, prof);
                 incrementCount();
             }
-            for (const user of users) {
-                await httpService.put("user/" + user._id, user);
-                incrementCount();
-            }
             for (const qual of qualities) {
                 await httpService.put("quality/" + qual._id, qual);
+                incrementCount();
+            }
+            for (const user of users) {
+                await httpService.put("user/" + user._id, user);
                 incrementCount();
             }
         } catch (error) {
