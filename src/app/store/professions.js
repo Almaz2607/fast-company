@@ -54,7 +54,11 @@ export const getProfessionsLoadingStatus = () => (state) =>
     state.professions.isLoading;
 
 export const getProfessionById = (professionId) => (state) => {
-    return state.professions.entities.find((prof) => prof._id === professionId);
+    if (state.professions.entities) {
+        return state.professions.entities.find(
+            (prof) => prof._id === professionId
+        );
+    }
 };
 
 export default professionsReducer;

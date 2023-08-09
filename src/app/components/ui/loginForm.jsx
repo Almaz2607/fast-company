@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { validator } from "../../utils/validator";
 import TextField from "../common/form/textField";
 import CheckBoxField from "../common/form/checkBoxField";
-// import * as yup from "yup";
-import { useAuth } from "../../hooks/useAuth";
 import { useHistory } from "react-router-dom";
+import { login } from "../../store/users";
+import { useDispatch } from "react-redux";
+// import * as yup from "yup";
 
 const LoginForm = () => {
     const [data, setData] = useState({
@@ -13,7 +14,7 @@ const LoginForm = () => {
         stayOn: false
     });
     const history = useHistory();
-    const { logIn } = useAuth();
+    const dispatch = useDispatch();
     const [errors, setErrors] = useState({});
     const [enterError, setEnterError] = useState(null);
 
@@ -83,16 +84,11 @@ const LoginForm = () => {
         const isValid = validate();
         if (!isValid) return;
 
-        try {
-            await logIn(data);
-            history.push(
-                history.location.state
-                    ? history.location.state.from.pathname
-                    : "/"
-            );
-        } catch (error) {
-            setEnterError(error.message);
-        }
+        const redirect = history.location.state
+            ? history.location.state.from.pathname
+            : "/";
+
+        dispatch(login({ payload: data, redirect }));
     };
 
     return (
