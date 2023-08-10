@@ -6,9 +6,7 @@ import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import { validator } from "../../../utils/validator";
 import BackHistoryButton from "../../common/backButton";
-import { useHistory } from "react-router-dom";
-import { useAuth } from "../../../hooks/useAuth";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
     getQualities,
     getQualitiesLoadingStatus
@@ -17,10 +15,10 @@ import {
     getProfessions,
     getProfessionsLoadingStatus
 } from "../../../store/professions";
-import { getCurrentUserData } from "../../../store/users";
+import { getCurrentUserData, updateUserData } from "../../../store/users";
 
 const EditUserPage = () => {
-    const history = useHistory();
+    const dispatch = useDispatch();
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState();
     const [errors, setErrors] = useState({});
@@ -29,7 +27,6 @@ const EditUserPage = () => {
     const qualities = useSelector(getQualities());
     const qualitiesLoading = useSelector(getQualitiesLoadingStatus());
     const currentUser = useSelector(getCurrentUserData());
-    const { updateUserData } = useAuth();
 
     const professionsList = professions.map((p) => ({
         value: p._id,
@@ -112,16 +109,20 @@ const EditUserPage = () => {
 
     const isValid = Object.keys(errors).length === 0;
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
 
-        await updateUserData({
-            ...data,
-            qualities: data.qualities.map((qual) => qual.value)
-        });
-        history.push(`/users/${currentUser._id}`);
+        dispatch(
+            updateUserData(
+                {
+                    ...data,
+                    qualities: data.qualities.map((qual) => qual.value)
+                },
+                currentUser._id
+            )
+        );
     };
 
     return (
