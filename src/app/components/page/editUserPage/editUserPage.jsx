@@ -115,13 +115,10 @@ const EditUserPage = () => {
         if (!isValid) return;
 
         dispatch(
-            updateUserData(
-                {
-                    ...data,
-                    qualities: data.qualities.map((qual) => qual.value)
-                },
-                currentUser._id
-            )
+            updateUserData({
+                ...data,
+                qualities: data.qualities.map((qual) => qual.value)
+            })
         );
     };
 
