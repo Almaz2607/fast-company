@@ -1,5 +1,6 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAction, createSlice } from "@reduxjs/toolkit";
 import commentService from "../services/comment.service";
+import { nanoid } from "nanoid";
 
 const commentsSlice = createSlice({
     name: "comments",
@@ -19,12 +20,37 @@ const commentsSlice = createSlice({
         commentsRequestFailed: (state, action) => {
             state.error = action.payload;
             state.isLoading = false;
+        },
+        commentCreateSuccess: (state, action) => {
+            state.entities = [...state.entities, action.payload];
+        },
+        commentCreateFailed: (state, action) => {
+            state.error = action.payload;
+        },
+        commentRemoveSuccess: (state, action) => {
+            state.entities = state.entities.filter(
+                (c) => c._id !== action.payload
+            );
+        },
+        commentRemoveFailed: (state, action) => {
+            state.error = action.payload;
         }
     }
 });
 
 const { reducer: commentsReducer, actions } = commentsSlice;
-const { commentsRequested, commentsReceived, commentsRequestFailed } = actions;
+const {
+    commentsRequested,
+    commentsReceived,
+    commentsRequestFailed,
+    commentCreateSuccess,
+    commentCreateFailed,
+    commentRemoveSuccess,
+    commentRemoveFailed
+} = actions;
+
+const commentCreateRequested = createAction("comments/commentCreateRequested");
+const commentRemoveRequested = createAction("comments/commentRemoveRequested");
 
 export const loadCommentsList = (userId) => async (dispatch) => {
     dispatch(commentsRequested());
@@ -33,6 +59,36 @@ export const loadCommentsList = (userId) => async (dispatch) => {
         dispatch(commentsReceived(content));
     } catch (error) {
         dispatch(commentsRequestFailed(error.message));
+    }
+};
+
+export const createComment =
+    (data, userId, currentUserId) => async (dispatch) => {
+        const comment = {
+            ...data,
+            _id: nanoid(),
+            pageId: userId,
+            created_at: Date.now(),
+            userId: currentUserId
+        };
+        dispatch(commentCreateRequested());
+        try {
+            const { content } = await commentService.createComment(comment);
+            dispatch(commentCreateSuccess(content));
+        } catch (error) {
+            dispatch(commentCreateFailed(error.message));
+        }
+    };
+
+export const removeComment = (id) => async (dispatch) => {
+    dispatch(commentRemoveRequested());
+    try {
+        const { content } = await commentService.removeComment(id);
+        if (content === null) {
+            dispatch(commentRemoveSuccess(id));
+        }
+    } catch (error) {
+        dispatch(commentRemoveFailed(error.message));
     }
 };
 
