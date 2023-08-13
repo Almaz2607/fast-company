@@ -9,7 +9,6 @@ import {
     loadCommentsList,
     removeComment
 } from "../../store/comments";
-import { getCurrentUserId } from "../../store/users";
 
 const Comments = () => {
     const { userId } = useParams();
@@ -21,10 +20,9 @@ const Comments = () => {
 
     const isLoading = useSelector(getCommentsLoadingStatus());
     const comments = useSelector(getComments());
-    const currentUserId = useSelector(getCurrentUserId());
 
     const handleSubmit = (data) => {
-        dispatch(createComment(data, userId, currentUserId));
+        dispatch(createComment({ ...data, pageId: userId }));
     };
     const handleRemoveComment = (id) => {
         dispatch(removeComment(id));
